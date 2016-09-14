@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, ListView, Text, View,StyleSheet,ToolbarAndroid,TouchableHighlight,TouchableOpacity,DrawerLayoutAndroid,StatusBar } from 'react-native';
+import { AppRegistry, ListView, Text, View,StyleSheet,ToolbarAndroid,TouchableHighlight,TouchableOpacity,DrawerLayoutAndroid,StatusBar,Linking } from 'react-native';
 import Image from 'react-native-image-progress';
 
 export default class allArtistsComponent extends Component {
@@ -8,10 +8,13 @@ export default class allArtistsComponent extends Component {
         super(props);
         this.state = {
             loader:'LOADING...',
+            genreTitle:'',
             title:this.props.title,/*or use props.title ---still in same scope*/
-            dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows([''])
+            dataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(['']),
+            genreDataSource: new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
+                            .cloneWithRows(require('./genreList'))
         };
-        this.loadArtists();
+        this.loadArtists('Pop'); //initially call Pop artists
     };
 
     /*function to push to navigator AND display name of selected artist*/
@@ -29,8 +32,9 @@ export default class allArtistsComponent extends Component {
     /*ENDopen close drawer func*/
 
     /*function to fetch artists*/
-    loadArtists(){
-        fetch('http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=pop&api_key=57ee3318536b23ee81d6b27e36997cde&format=json')
+    loadArtists(genre){
+        var Urlgenre=encodeURIComponent(genre);
+        fetch('http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag='+Urlgenre+'&api_key=57ee3318536b23ee81d6b27e36997cde&format=json')
             .then(function (response) {
                 return response.json();
             })
@@ -38,15 +42,26 @@ export default class allArtistsComponent extends Component {
                 var jsonOBJ = respJSON.topartists.artist;
                 this.setState({
                     dataSource:new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2}).cloneWithRows(jsonOBJ),
-                    loader:''
+                    loader:'',
+                    genreTitle:genre
                 });
                 /*console.log(jsonOBJ);*/
             }.bind(this))
             .catch(function (error) {
                 console.log(error);
             });
+
     };
     /*END function to fetch artists*/
+
+    /*get list of selected genre*/
+    getGenreList(val){
+        this.loadArtists(val);
+        this.refs['DRAWER-OP'].closeDrawer();
+        this.setState({
+            loader:'LOADING...'
+        });
+    };
 
     render() {
 
@@ -68,6 +83,7 @@ export default class allArtistsComponent extends Component {
                         <TouchableOpacity onPress={()=>this.pushArtist(rowData.name)} style={{flex:1}} activeOpacity={0.5}>
                            <Text style={styles.singleListTxt}>{rowData.name}</Text>
                         </TouchableOpacity>
+                        <Image source={require("./right_arrow.png")} style={{width:10,height:15,right:10,top:15}}/>
                     </View>
                }
                 style={{paddingTop:5}}
@@ -76,9 +92,20 @@ export default class allArtistsComponent extends Component {
 
         //drawer menu components
         var navigationView = (
-            <View style={{flex: 1, backgroundColor: 'rgba(59,0,106,0.4)'}}>
-                <View style={{backgroundColor: 'rgba(59,0,106,0.8)',padding:12}}>
-                    <Text style={{textAlign:'center',fontSize:20,textStyle:'italic',fontWeight:'bold'}}>MusickA</Text>
+            <View style={{flex: 1, backgroundColor: 'rgba(59,0,106,1)'}}>
+                <Image source={require("./logo_BG.jpg")} style={{height:70,padding:20}}>
+                    <Text style={{textAlign:'center',fontSize:25,fontWeight:'bold',color:'#3b006a'}}>MusickA</Text>
+                </Image>
+                <ListView
+                    dataSource={this.state.genreDataSource}
+                    renderRow={(eachRow)=>
+                        <TouchableOpacity onPress={()=>this.getGenreList(eachRow.name)} style={{padding:20,backgroundColor:'rgba(217,66,159,0.6)',marginTop:1}}>
+                            <Text style={{textAlign:'center',fontSize:18,color:'#F0D32D'}}>{eachRow.name}</Text>
+                        </TouchableOpacity>
+                    }
+                />
+                <View style={{bottom:1,padding:5}}>
+                    <Text onPress={()=> Linking.openURL('http://www.mahlugee.byethost7.com')} style={{color:'#bbb'}}>Copyright | About Developer</Text>
                 </View>
             </View>
         );
@@ -96,7 +123,9 @@ export default class allArtistsComponent extends Component {
                     <TouchableOpacity onPress={()=>this.openDrawerFunc()} style={{width:20,height:20,left:-5}}>
                         <Image source={require("./drawerImg.png")} style={{width:20,height:20}}/>
                     </TouchableOpacity>
-                    <View style={{}}><Text style={{color:'#fff'}}> {this.state.title}</Text></View>
+                    <View>
+            <Text style={{color:'#fff'}}> {this.state.title} <Text style={{fontWeight:'bold',fontSize:16,color:'#F0D32D'}}>{this.state.genreTitle}</Text></Text>
+                    </View>
                 </View>
                 {artist_list_area}
             </View>;
@@ -121,10 +150,7 @@ const styles = StyleSheet.create({
         padding:10,
         flex:1,
         flexDirection:'row',
-        backgroundColor:'#fff',
-        /*borderStyle:'solid',
-        borderBottomColor:'#ccc',
-        borderBottomWidth:0.5,*/
+        backgroundColor:'#fff'
     },
     thumbnailHolder:{
         width:50,
@@ -134,17 +160,15 @@ const styles = StyleSheet.create({
         borderWidth:0.5
     },
     singleListTxt:{
-        /*textAlign:'center',*/
-        /*backgroundColor:'#234',*/
         fontSize:18,
-        left:10
+        left:10,
+        top:10
     },
     toolBar:{
         padding:15,
         backgroundColor:'#D9429F',
         elevation:5,
         flexDirection:'row'
-        /*marginBottom:15*/
     },
     outputText:{
         padding:6,

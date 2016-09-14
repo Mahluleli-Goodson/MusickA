@@ -124,11 +124,7 @@ export default class artistProfileComponent extends Component {
 
               {/*main view section*/}
               {main_content}
-
-              {/*<Text style={styles.anchors} onPress={() => Linking.openURL('http://www.theriket.com/#/')}>Powered By TheRiket</Text>*/}
-
               {this.state.modalOpen==true?<ImageWindow modalStatus={this.state.modalOpen} imageEnlarge={this.state.imageSelect}/>:null}
-
           </View>
         )
 

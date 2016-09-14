@@ -6,7 +6,7 @@ import ArtistProfile from './artistProfileComponent';
 class MusickA extends Component {
 
   renderScene(route,navigator){
-    if(route.title=='Top POP Artists'){
+    if(route.title=='Top Artists: '){
       return <AllArtists title={route.title} navigator={navigator}/>
     }else{
       return <ArtistProfile name={route.title} navigator={navigator}/>
@@ -16,7 +16,7 @@ class MusickA extends Component {
   render() {
     return (
         <Navigator
-    initialRoute={{ title: 'Top POP Artists'}}
+    initialRoute={{ title: 'Top Artists: '}}
     renderScene={this.renderScene.bind(this)}
     configureScene={(route, routeStack) =>
     Navigator.SceneConfigs.FloatFromBottomAndroid}
