@@ -77,7 +77,9 @@ export default class allArtistsComponent extends Component {
         //drawer menu components
         var navigationView = (
             <View style={{flex: 1, backgroundColor: 'rgba(59,0,106,0.4)'}}>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'left'}}>I'm in the Drawer!</Text>
+                <View style={{backgroundColor: 'rgba(59,0,106,0.8)',padding:12}}>
+                    <Text style={{textAlign:'center',fontSize:20,textStyle:'italic',fontWeight:'bold'}}>MusickA</Text>
+                </View>
             </View>
         );
 
